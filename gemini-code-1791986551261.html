@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animal RNG - Ultimate Edition</title>
+    <style>
+        :root {
+            --bg-color: #1a1a2e;
+            --card-bg: #16213e;
+            --accent-color: #0f3460;
+            --text-color: #ffffff;
+            --highlight: #e94560;
+            --gold: #f1c40f;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            color: var(--gold);
+            text-shadow: 0 0 10px rgba(241, 196, 15, 0.5);
+            margin-bottom: 5px;
+        }
+
+        .stats-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            background: var(--card-bg);
+            padding: 15px 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .stat-box {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .rng-box {
+            background: var(--card-bg);
+            border: 3px solid var(--accent-color);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            width: 100%;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
+
+        .animal-display {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 20px 0;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 10px;
+            padding: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .rarity-display {
+            font-size: 1.2rem;
+            margin-top: 10px;
+            color: #ddd;
+        }
+
+        .btn {
+            background-color: var(--highlight);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.1s, background-color 0.2s;
+            box-shadow: 0 4px 15px rgba(233, 69, 96, 0.4);
+        }
+
+        .btn:hover {
+            background-color: #ff6b81;
+            transform: scale(1.05);
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            width: 100%;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            background: var(--card-bg);
+            border: none;
+            color: white;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab-btn.active {
+            border-bottom: 3px solid var(--highlight);
+            background: #1f2d5a;
+        }
+
+        .tab-content {
+            display: none;
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 0 0 15px 15px;
+            width: 100%;
+            box-sizing: border-box;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Shop Grid */
+        .shop-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .shop-item {
+            background: var(--accent-color);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* Index Grid */
+        .index-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .index-card {
+            background: #0f172a;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            text-align: center;
+            opacity: 0.5;
+        }
+
+        .index-card.unlocked {
+            opacity: 1;
+            border-color: var(--gold);
+        }
+
+        .index-card .name {
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .index-card .chance {
+            font-size: 0.8rem;
+            color: #aaa;
+        }
+
+        /* Rebirth Section */
+        .rebirth-box {
+            text-align: center;
+            padding: 20px;
+        }
+
+        /* Rarity Colors */
+        .c-common { color: #a0a0a0; }
+        .c-uncommon { color: #2ecc71; }
+        .c-rare { color: #3498db; }
+        .c-epic { color: #9b59b6; }
+        .c-legendary { color: #f1c40f; }
+        .c-mythic { color: #e67e22; }
+        .c-godly { color: #e74c3c; }
+        .c-cosmic { color: #00ffff; }
+        .c-celestial { color: #ff00ff; }
+        .c-omnipotent { color: #ff0055; text-shadow: 0 0 10px #ff0055; }
+        .c-transcendent { color: #ffffff; text-shadow: 0 0 15px #ffffff, 0 0 20px #00ffff; }
+    </style>
+</head>
+<body>
+
+    <h1>ANIMAL RNG</h1>
+    <p style="margin-top: 0; color: #aaa;">Uji keberuntunganmu & Dapatkan Hewan Terlangka!</p>
+
+    <!-- Stats Bar -->
+    <div class="stats-container">
+        <div class="stat-box">Coins: <span id="coins-display" style="color: var(--gold);">0</span> 🪙</div>
+        <div class="stat-box">Luck Multiplier: <span id="luck-display" style="color: #2ecc71;">1x</span> 🍀</div>
+        <div class="stat-box">Rebirths: <span id="rebirth-display" style="color: #9b59b6;">0</span> 👑</div>
+    </div>
+
+    <div class="main-container">
+        <!-- RNG Section -->
+        <div class="rng-box">
+            <div id="animal-display" class="animal-display">
+                <span class="c-common">Klik "ROLL" untuk Memulai!</span>
+            </div>
+            <button id="roll-btn" class="btn" onclick="rollAnimal()">ROLL (10s Cooldown)</button>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="openTab('shop')">🛒 Shop</button>
+            <button class="tab-btn" onclick="openTab('index')">📖 Index (<span id="unlocked-count">0</span>/<span id="total-count">0</span>)</button>
+            <button class="tab-btn" onclick="openTab('rebirth')">👑 Rebirth</button>
+        </div>
+
+        <!-- Tab 1: Shop -->
+        <div id="shop" class="tab-content active">
+            <h2>Luck Upgrade Shop</h2>
+            <div class="shop-grid">
+                <div class="shop-item">
+                    <h3>Lucky Clover I</h3>
+                    <p>Menambah +0.5x Luck</p>
+                    <p>Harga: <span style="color:var(--gold)">100 Coins</span></p>
+                    <button class="btn" style="padding: 8px 15px; font-size: 0.9rem;" onclick="buyUpgrade(100, 0.5)">Beli</button>
+                </div>
+                <div class="shop-item">
+                    <h3>Lucky Clover II</h3>
+                    <p>Menambah +2x Luck</p>
+                    <p>Harga: <span style="color:var(--gold)">500 Coins</span></p>
+                    <button class="btn" style="padding: 8px 15px; font-size: 0.9rem;" onclick="buyUpgrade(500, 2)">Beli</button>
+                </div>
+                <div class="shop-item">
+                    <h3>Golden Horseshoe</h3>
+                    <p>Menambah +10x Luck</p>
+                    <p>Harga: <span style="color:var(--gold)">2,500 Coins</span></p>
+                    <button class="btn" style="padding: 8px 15px; font-size: 0.9rem;" onclick="buyUpgrade(2500, 10)">Beli</button>
+                </div>
+                <div class="shop-item">
+                    <h3>Elixir of Fortune</h3>
+                    <p>Menambah +50x Luck</p>
+                    <p>Harga: <span style="color:var(--gold)">15,000 Coins</span></p>
+                    <button class="btn" style="padding: 8px 15px; font-size: 0.9rem;" onclick="buyUpgrade(15000, 50)">Beli</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 2: Index -->
+        <div id="index" class="tab-content">
+            <h2>Animal Collection Index</h2>
+            <div id="index-grid" class="index-grid">
+                <!-- Generator via JavaScript -->
+            </div>
+        </div>
+
+        <!-- Tab 3: Rebirth -->
+        <div id="rebirth" class="tab-content">
+            <div class="rebirth-box">
+                <h2>Rebirth System</h2>
+                <p>Melakukan Rebirth akan **mereset Coins & Shop Upgrades** Anda, namun memberikan **Permanen +5x Luck Multiplier** dan **Bonus Base Luck Multiplier** per Rebirth!</p>
+                <br>
+                <p>Syarat Rebirth: <b style="color: var(--gold);">1,000,000 Coins</b></p>
+                <button class="btn" style="background-color: #9b59b6;" onclick="doRebirth()">REBIRTH SEKARANG</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data Hewan dan Rarity (1 hingga 10^24)
+        const ANIMALS = [
+            { id: 1, name: "Kucing (Cat)", rarity: 1, class: "c-common", reward: 1 },
+            { id: 2, name: "Anjing (Dog)", rarity: 2, class: "c-common", reward: 2 },
+            { id: 3, name: "Ayam (Chicken)", rarity: 5, class: "c-uncommon", reward: 5 },
+            { id: 4, name: "Kelinci (Rabbit)", rarity: 10, class: "c-uncommon", reward: 10 },
+            { id: 5, name: "Serigala (Wolf)", rarity: 50, class: "c-rare", reward: 35 },
+            { id: 6, name: "Beruang (Bear)", rarity: 100, class: "c-rare", reward: 75 },
+            { id: 7, name: "Singa (Lion)", rarity: 500, class: "c-epic", reward: 300 },
+            { id: 8, name: "Gajah (Elephant)", rarity: 1000, class: "c-epic", reward: 600 },
+            { id: 9, name: "Naga Api (Fire Dragon)", rarity: 10000, class: "c-legendary", reward: 4000 },
+            { id: 10, name: "Phoenix (Firebird)", rarity: 100000, class: "c-legendary", reward: 25000 },
+            { id: 11, name: "Kraken (Sea Monster)", rarity: 1000000, class: "c-mythic", reward: 150000 },
+            { id: 12, name: "Kirin (Mythical Beast)", rarity: 10000000, class: "c-mythic", reward: 1000000 },
+            { id: 13, name: "Leviathan", rarity: 100000000, class: "c-godly", reward: 8000000 },
+            { id: 14, name: "Behemoth", rarity: 1000000000, class: "c-godly", reward: 50000000 },
+            { id: 15, name: "Celestial Seraph", rarity: 100000000000, class: "c-cosmic", reward: 3000000000 },
+            { id: 16, name: "Void Behemoth", rarity: 10000000000000, class: "c-cosmic", reward: 200000000000 },
+            { id: 17, name: "Galaxy Serpent", rarity: 1000000000000000, class: "c-celestial", reward: 10000000000000 },
+            { id: 18, name: "Universal Entity", rarity: 1000000000000000000, class: "c-omnipotent", reward: 5000000000000000 },
+            { id: 19, name: "Reality Warper Dragon", rarity: 1000000000000000000000, class: "c-omnipotent", reward: 10000000000000000000 },
+            { id: 20, name: "THE ABSOLUTE CREATOR ANIMAL", rarity: 1000000000000000000000000, class: "c-transcendent", reward: 10000000000000000000000 }
+        ];
+
+        // State Player
+        let player = {
+            coins: 0,
+            luck: 1,
+            rebirths: 0,
+            unlockedIndex: new Set()
+        };
+
+        // Format Angka Besar ke Teks yang Mudah Dibaca
+        function formatNumber(num) {
+            if (num >= 1e24) return (num / 1e24).toFixed(0) + " Septillion (1 in 10²⁴)";
+            if (num >= 1e21) return (num / 1e21).toFixed(0) + " Sextillion";
+            if (num >= 1e18) return (num / 1e18).toFixed(0) + " Quintillion";
+            if (num >= 1e15) return (num / 1e15).toFixed(0) + " Quadrillion";
+            if (num >= 1e12) return (num / 1e12).toFixed(0) + " Trillion";
+            if (num >= 1e9) return (num / 1e9).toFixed(0) + " Billion";
+            if (num >= 1e6) return (num / 1e6).toFixed(0) + " Million";
+            if (num >= 1e3) return (num / 1e3).toFixed(0) + "K";
+            return num.toLocaleString();
+        }
+
+        // System Tab
+        function openTab(tabName) {
+            const contents = document.querySelectorAll('.tab-content');
+            const tabs = document.querySelectorAll('.tab-btn');
+            
+            contents.forEach(content => content.classList.remove('active'));
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            document.getElementById(tabName).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        // Logic Gacha / Roll RNG
+        function rollAnimal() {
+            const rollBtn = document.getElementById('roll-btn');
+            rollBtn.disabled = true;
+
+            // Animasi Acak Sederhana
+            let counter = 0;
+            const display = document.getElementById('animal-display');
+            const interval = setInterval(() => {
+                const tempAnimal = ANIMALS[Math.floor(Math.random() * ANIMALS.length)];
+                display.innerHTML = `<span class="${tempAnimal.class}">Rolling... ${tempAnimal.name}</span>`;
+                counter++;
+                if (counter > 10) {
+                    clearInterval(interval);
+                    executeRollResult();
+                }
+            }, 100);
+
+            // Cooldown 1 Detik
+            setTimeout(() => {
+                rollBtn.disabled = false;
+            }, 1000);
+        }
+
+        function executeRollResult() {
+            // Formula RNG dengan Luck Multiplier
+            // Semakin tinggi luck, angka random yang didapatkan semakin efektif untuk membuka hewan terlangka
+            let rolledAnimal = ANIMALS[0]; // Default Common
+
+            // Sortir dari terlangka ke terumum
+            const sortedAnimals = [...ANIMALS].sort((a, b) => b.rarity - a.rarity);
+
+            for (let animal of sortedAnimals) {
+                // Efektifitas Roll: Chance yang disesuaikan dengan Luck
+                let chanceThreshold = animal.rarity / player.luck;
+                
+                // Roll acak
+                let randomRoll = Math.random() * chanceThreshold;
+                
+                if (randomRoll <= 1) {
+                    rolledAnimal = animal;
+                    break;
+                }
+            }
+
+            // Update State
+            player.coins += rolledAnimal.reward;
+            player.unlockedIndex.add(rolledAnimal.id);
+
+            // Tampilkan Hasil
+            const display = document.getElementById('animal-display');
+            display.innerHTML = `
+                <div class="${rolledAnimal.class}">
+                    ${rolledAnimal.name}
+                    <div class="rarity-display">Rarity: 1 in ${formatNumber(rolledAnimal.rarity)}</div>
+                    <div style="font-size: 0.9rem; color: #2ecc71; margin-top:5px;">+${formatNumber(rolledAnimal.reward)} Coins</div>
+                </div>
+            `;
+
+            updateUI();
+        }
+
+        // Buy Upgrade Function
+        function buyUpgrade(cost, luckAmount) {
+            if (player.coins >= cost) {
+                player.coins -= cost;
+                player.luck += luckAmount;
+                updateUI();
+                alert(`Berhasil membeli! Luck bertambah +${luckAmount}x`);
+            } else {
+                alert("Coins Anda tidak cukup!");
+            }
+        }
+
+        // Rebirth Function
+        function doRebirth() {
+            const cost = 1000000;
+            if (player.coins >= cost) {
+                player.coins = 0;
+                player.rebirths += 1;
+                // Base luck baru didapat dari Rebirth
+                player.luck = 1 + (player.rebirths * 5); 
+                updateUI();
+                alert(`Selamat! Anda telah melakukan Rebirth #${player.rebirths}. Luck dasar Anda menjadi ${player.luck}x!`);
+            } else {
+                alert(`Anda membutuhkan minimal 1,000,000 Coins untuk Rebirth!`);
+            }
+        }
+
+        // Render Index Grid
+        function renderIndex() {
+            const grid = document.getElementById('index-grid');
+            grid.innerHTML = '';
+
+            ANIMALS.forEach(animal => {
+                const isUnlocked = player.unlockedIndex.has(animal.id);
+                const card = document.createElement('div');
+                card.className = `index-card ${isUnlocked ? 'unlocked' : ''}`;
+                
+                card.innerHTML = `
+                    <div style="font-size: 1.5rem;">${isUnlocked ? '🐾' : '❓'}</div>
+                    <div class="name ${isUnlocked ? animal.class : ''}">${isUnlocked ? animal.name : '???'}</div>
+                    <div class="chance">1 in ${formatNumber(animal.rarity)}</div>
+                `;
+                grid.appendChild(card);
+            });
+
+            document.getElementById('unlocked-count').innerText = player.unlockedIndex.size;
+            document.getElementById('total-count').innerText = ANIMALS.length;
+        }
+
+        // Update Text Display / UI
+        function updateUI() {
+            document.getElementById('coins-display').innerText = formatNumber(player.coins);
+            document.getElementById('luck-display').innerText = player.luck.toFixed(1) + "x";
+            document.getElementById('rebirth-display').innerText = player.rebirths;
+            renderIndex();
+        }
+
+        // Inisialisasi awal saat pertama kali dibuka
+        renderIndex();
+    </script>
+</body>
+</html>
